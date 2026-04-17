@@ -1,0 +1,19 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "modded-save-sync", "modded-save-sync\modded-save-sync.csproj", "{94B48A65-CE5B-42EA-A716-9627F651C749}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		ExportDebug|Any CPU = ExportDebug|Any CPU
+		ExportRelease|Any CPU = ExportRelease|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{94B48A65-CE5B-42EA-A716-9627F651C749}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94B48A65-CE5B-42EA-A716-9627F651C749}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94B48A65-CE5B-42EA-A716-9627F651C749}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{94B48A65-CE5B-42EA-A716-9627F651C749}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{94B48A65-CE5B-42EA-A716-9627F651C749}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{94B48A65-CE5B-42EA-A716-9627F651C749}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+	EndGlobalSection
+EndGlobal
