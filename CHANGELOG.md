@@ -3,6 +3,13 @@
 <!-- AI: append a new entry after each work session. Do not edit previous entries. -->
 <!-- Format: ## YYYY-MM-DD [Stage] — brief summary, then bullet points -->
 
+## 2026-04-16 [PLANNING] — update AI instructions and architecture docs
+
+- Added per-mod design document convention to `AI_INSTRUCTIONS.md`: each mod gets `docs/designs/<mod-name>.md`
+- Added changelog convention: solution-level CHANGELOG references mod changelogs; detailed changes go in `mods/<mod-name>/CHANGELOG.md`
+- Created `docs/designs/modded-save-sync.md` (TBD placeholder)
+- Updated `docs/architecture.md`: added Alchyr/ModTemplate framework context, `Alchyr.Sts2.Templates` install flow, three template types, corrected new-mod steps to use `dotnet new` + Rider File → New Solution
+
 ## 2026-04-16 [PLANNING] — restructure mods directory and document architecture
 
 - Moved mod projects under `mods/` directory
