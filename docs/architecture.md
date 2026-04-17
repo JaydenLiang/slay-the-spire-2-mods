@@ -4,8 +4,11 @@
 
 - **Language:** C# (net9.0) + GDScript/scenes (Godot assets)
 - **Runtime:** Godot 4.5.1 mono (MegaDot fork used by STS2)
-- **Mod framework:** Alchyr.Sts2.BaseLib, HarmonyX (runtime patching), Krafs.Publicizer
+- **Mod framework:** [Alchyr/ModTemplate](https://github.com/Alchyr/ModTemplate) — community standard; built on `Alchyr.Sts2.BaseLib`
+- **BaseLib provides:** standardized content registration hooks (cards, relics, potions…), utility base classes, and automated build pipeline (`dotnet publish` → `.dll` + `.pck` → mods directory)
+- **Patching:** HarmonyX (runtime patching), Krafs.Publicizer (access private/protected members)
 - **Build system:** MSBuild via `Godot.NET.Sdk`
+- **Project templates:** `Alchyr.Sts2.Templates` — install once, then use in Rider via File → New Solution
 - **IDE:** JetBrains Rider (`.sln`) + VSCode (`.code-workspace`)
 
 ## Directory Structure
@@ -30,14 +33,31 @@
 
 ## Adding a New Mod
 
-1. In Rider, right-click the solution → **Add → New Project**, place it under `mods/<new-mod-name>/`. Rider updates `.sln` automatically.
+### First-time setup (once per machine)
+
+Install the official project templates:
+
+```bash
+dotnet new install Alchyr.Sts2.Templates
+```
+
+### Per-mod steps
+
+1. In Rider: **File → New Solution** → pick a `Slay the Spire 2` template (Mod / Content / Character), set location to `mods/<new-mod-name>/`. Rider creates the project and updates `.sln` automatically.
 2. Copy `Directory.Build.props` and `Sts2PathDiscovery.props` from an existing mod into the new project directory.
-3. Create the mod manifest `mods/<new-mod-name>/<new-mod-name>.json` (see existing mod for schema).
-4. Add the folder to `slay-the-spire-2-mods.code-workspace`:
+3. Add the folder to `slay-the-spire-2-mods.code-workspace`:
 
    ```json
    { "path": "mods/<new-mod-name>" }
    ```
+
+### Template types
+
+| Template | Use when |
+| --- | --- |
+| `Slay the Spire 2 Mod` | Basic mod — logic/patches only, no new content |
+| `Slay the Spire 2 Content` | Adding cards, relics, potions, etc. |
+| `Slay the Spire 2 Character` | Adding a new playable character |
 
 ## Build Configurations
 
@@ -108,13 +128,16 @@ public partial class MainFile : Node
 ## Commands
 
 ```bash
+# Install project templates (once per machine)
+dotnet new install Alchyr.Sts2.Templates
+
 # Build a single mod (Debug)
 dotnet build mods/<mod-name>/<mod-name>.csproj
 
 # Build all mods
 dotnet build slay-the-spire-2-mods.sln
 
-# Publish (triggers Godot headless .pck export)
+# Publish — compiles .dll, exports .pck via Godot headless, copies both to mods directory
 dotnet publish mods/<mod-name>/<mod-name>.csproj
 ```
 
