@@ -1,3 +1,18 @@
 
 ai-project-integration-plan/
+.vscode/
+.git/
 .idea/
+.vs/
+
+.godot/
+bin/
+obj/
+/android/
+.vs/
+publish/
+Properties/
+packages/
+.editorconfig
+*.user
+Directory.Build.props

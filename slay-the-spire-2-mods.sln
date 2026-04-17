@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "modded-save-sync", "modded-save-sync\modded-save-sync.csproj", "{94B48A65-CE5B-42EA-A716-9627F651C749}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "modded-save-sync", "mods\modded-save-sync\modded-save-sync.csproj", "{94B48A65-CE5B-42EA-A716-9627F651C749}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
