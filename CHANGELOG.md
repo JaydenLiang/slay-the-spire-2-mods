@@ -3,6 +3,11 @@
 <!-- AI: append a new entry after each work session. Do not edit previous entries. -->
 <!-- Format: ## YYYY-MM-DD [Stage] — brief summary, then bullet points -->
 
+## 2026-04-17 [CHORE] — add coding guide and AI sub-agent conventions
+
+- Created `docs/coding_guide.md`: rules for using sub-agents to read decompiled source files and write code
+- Updated `AI_INSTRUCTIONS.md`: added `docs/coding_guide.md` as always-available reference
+
 ## 2026-04-16 [PLANNING] — update AI instructions and architecture docs
 
 - Added per-mod design document convention to `AI_INSTRUCTIONS.md`: each mod gets `docs/designs/<mod-name>.md`
