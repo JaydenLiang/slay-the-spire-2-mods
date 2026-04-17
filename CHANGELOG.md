@@ -8,6 +8,10 @@
 - Created `docs/coding-guide.md`: rules for using sub-agents to read decompiled source files and write code
 - Updated `AI_INSTRUCTIONS.md`: added `docs/coding-guide.md` as always-available reference
 
+## 2026-04-17 [CODING] — modded-save-sync UnifiedSavePath implemented
+
+- modded-save-sync has new updates, see details in: mods/modded-save-sync/CHANGELOG.md
+
 ## 2026-04-16 [PLANNING] — update AI instructions and architecture docs
 
 - Added per-mod design document convention to `AI_INSTRUCTIONS.md`: each mod gets `docs/designs/<mod-name>.md`
