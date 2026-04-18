@@ -7,6 +7,7 @@
 
 - Created `docs/coding-guide.md`: rules for using sub-agents to read decompiled source files and write code
 - Updated `AI_INSTRUCTIONS.md`: added `docs/coding-guide.md` as always-available reference
+- Updated memory: decompile workflow now includes sub-agent per-file pattern
 
 ## 2026-04-17 [CODING] — modded-save-sync UnifiedSavePath implemented
 

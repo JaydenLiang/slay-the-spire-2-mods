@@ -14,5 +14,6 @@ publish/
 Properties/
 packages/
 .editorconfig
+.claude/
 *.user
 Directory.Build.props

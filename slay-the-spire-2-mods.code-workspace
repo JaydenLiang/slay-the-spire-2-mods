@@ -1,6 +1,7 @@
 {
   "folders": [
-    { "path": "mods/modded-save-sync" }
+    { "path": "mods/modded-save-sync" },
+    { "path": "mods/reload-run" }
   ],
   "settings": {
     "godotTools.editorPath.godot4": "D:/projects/Godot_v4.5.1-stable_mono_win64/Godot_v4.5.1-stable_mono_win64_console.exe"

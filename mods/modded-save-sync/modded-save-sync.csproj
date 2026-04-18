@@ -2,6 +2,7 @@
     <Import Project=".\Sts2PathDiscovery.props"/>
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
+        <AssemblyName>modded_save_sync</AssemblyName>
         <ImplicitUsings>true</ImplicitUsings>
         <Nullable>enable</Nullable> <!--Makes code analysis regarding null values stricter.-->
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -37,15 +38,15 @@
         <PackageReference Include="Alchyr.Sts2.ModAnalyzers" Version="*"/>
         <!-- Generates a .pck file when building if only using simple assets. May not work on all setups. Uncomment to test. -->
         <!-- <PackageReference Include="BSchneppe.StS2.PckPacker" Version="0.1.1" PrivateAssets="All" /> -->
-        <AdditionalFiles Include="modded-save-sync/localization/**/*.json"/> <!-- Used by analyzer -->
+        <AdditionalFiles Include="modded_save_sync/localization/**/*.json"/> <!-- Used by analyzer -->
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="modded-save-sync/**"/>
+        <Compile Remove="modded_save_sync/**"/>
         <Compile Remove="materials/**"/>
         <Compile Remove="shaders/**"/>
         <Compile Remove="images/**"/>
-        <EmbeddedResource Remove="modded-save-sync/**"/>
+        <EmbeddedResource Remove="modded_save_sync/**"/>
         <EmbeddedResource Remove="materials/**"/>
         <EmbeddedResource Remove="shaders/**"/>
         <EmbeddedResource Remove="images/**"/>
@@ -56,7 +57,7 @@
         <None Include=".gitignore"/>
         <None Include="modded-save-sync.json"/>
         <None Include="project.godot"/>
-        <None Include="modded-save-sync/**"/>
+        <None Include="modded_save_sync/**"/>
     </ItemGroup>
 
     <Target Name="CheckDependencyPaths">
@@ -68,7 +69,7 @@
     <Target Name="CopyToModsFolderOnBuild" AfterTargets="PostBuildEvent">
         <Message Text="Copying .dll and manifest to mods folder." Importance="high"/>
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/"/>
-        <Copy SourceFiles="$(AssemblyName).json" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/"/>
+        <Copy SourceFiles="$(MSBuildProjectName).json" DestinationFolder="$(ModsPath)$(MSBuildProjectName)/"/>
     </Target>
 
     <Target Name="CopyQuickPck" AfterTargets="PackPck" Condition="Exists('$(PckPackerOutputPath)') And '$(PckPackerSkipped)' != 'true'">

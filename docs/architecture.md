@@ -25,8 +25,8 @@
 │       ├── export_presets.cfg           # Godot export config (for .pck generation)
 │       ├── Directory.Build.props        # Local overrides: GodotPath, Sts2Path (gitignored)
 │       ├── Sts2PathDiscovery.props      # Cross-platform auto-detection of STS2 install
-│       ├── <mod-name>/                  # Godot assets (scenes, images, localization…)
-│       └── <mod-name>Code/              # C# source files
+│       ├── <mod_id>/                    # Godot assets (scenes, images, localization…) — snake_case
+│       └── <mod_id>Code/               # C# source files — snake_case
 │           └── MainFile.cs              # Mod entry point ([ModInitializer])
 └── docs/
 ```
@@ -97,7 +97,7 @@ Post-build automatically copies `.dll` + `.json` manifest (and `.pck` if generat
 - Mod id: **snake_case** (e.g. `modded_save_sync`) — used in manifest `id`, `ModId` constant, Harmony id, Logger name.
 - Directory/file names: **kebab-case** (e.g. `modded-save-sync`) — project folder, `.csproj`, `.json`.
 - C# namespace: `<mod_id>.<mod_id>Code` (e.g. `modded_save_sync.modded_save_syncCode`).
-- Godot assets go in `<mod-name>/` (kebab); C# source goes in `<mod-name>Code/` (kebab).
+- Godot assets go in `<mod_id>/` (snake_case); C# source goes in `<mod_id>Code/` (snake_case).
 - `Directory.Build.props` holds machine-local path overrides — do not commit absolute paths; rely on `Sts2PathDiscovery.props` auto-detection.
 
 ## Path Resolution (MSBuild)
@@ -157,6 +157,11 @@ dotnet publish mods/<mod-name>/<mod-name>.csproj
 - Godot version must stay at **4.5.1** — STS2 (MegaDot) rejects `.pck` files built with a newer version.
 - Do not change `TargetFramework` away from `net9.0`.
 - Do not commit machine-local absolute paths into `Directory.Build.props`.
+
+## Game Engine Reference
+
+When you need to understand sts2.dll internals (classes, methods, game flow),
+read `docs/game-engine-knowledge.md` before asking the user to decompile.
 
 ## Next Step
 
