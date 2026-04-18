@@ -4,6 +4,8 @@
 #
 # Builds the mod, packages artifacts into a zip, uploads to the GitHub prerelease,
 # then promotes it to a full release.
+#
+# Prerequisites: dotnet, gh (GitHub CLI), zip, python3
 
 set -euo pipefail
 
@@ -21,55 +23,14 @@ if [[ ! -f "$MANIFEST" ]]; then
   exit 1
 fi
 
-# --- Locate STS2 installation ---
-find_sts2_path() {
-  # 1. Check Directory.Build.props in the mod directory (highest priority)
-  local props="$MOD_DIR/Directory.Build.props"
-  if [[ -f "$props" ]]; then
-    local from_props
-    from_props=$(grep -oP '(?<=<Sts2Path>)[^<]+' "$props" 2>/dev/null || true)
-    if [[ -n "$from_props" && -d "$from_props" ]]; then
-      echo "$from_props"
-      return
-    fi
-  fi
-
-  # 2. Auto-detect by OS
-  local steam_path
-  case "$(uname -s)" in
-    Linux)
-      steam_path="$HOME/.local/share/Steam/steamapps"
-      ;;
-    Darwin)
-      steam_path="$HOME/Library/Application Support/Steam/steamapps"
-      ;;
-    *)
-      # Windows (Git Bash / MSYS2) — try common locations
-      for candidate in \
-        "D:/SteamLibrary/steamapps" \
-        "C:/Program Files (x86)/Steam/steamapps" \
-        "C:/Program Files/Steam/steamapps"; do
-        if [[ -d "$candidate/common/Slay the Spire 2" ]]; then
-          echo "$candidate/common/Slay the Spire 2"
-          return
-        fi
-      done
-      ;;
-  esac
-
-  local sts2="$steam_path/common/Slay the Spire 2"
-  if [[ -d "$sts2" ]]; then
-    echo "$sts2"
-    return
-  fi
-
-  echo ""
-}
-
-STS2_PATH=$(find_sts2_path)
-if [[ -z "$STS2_PATH" ]]; then
-  echo "Error: could not locate Slay the Spire 2 installation." >&2
-  echo "Set Sts2Path in $MOD_DIR/Directory.Build.props to override." >&2
+# --- Locate STS2 installation via Directory.Build.props ---
+PROPS="$MOD_DIR/Directory.Build.props"
+STS2_PATH=""
+if [[ -f "$PROPS" ]]; then
+  STS2_PATH=$(grep -oP '(?<=<Sts2Path>)[^<]+' "$PROPS" 2>/dev/null || true)
+fi
+if [[ -z "$STS2_PATH" || ! -d "$STS2_PATH" ]]; then
+  echo "Error: could not read Sts2Path from $PROPS" >&2
   exit 1
 fi
 
@@ -80,6 +41,15 @@ if [[ ! -f "$RELEASE_INFO" ]]; then
 fi
 
 GAME_VERSION=$(python3 -c "import json; print(json.load(open('$RELEASE_INFO'))['version'])")
+MANIFEST_GAME_VERSION=$(python3 -c "import json; print(json.load(open('$MANIFEST')).get('build_on_game_version', ''))")
+
+if [[ "$GAME_VERSION" != "$MANIFEST_GAME_VERSION" ]]; then
+  echo "Error: game version mismatch!" >&2
+  echo "  Installed game:  $GAME_VERSION" >&2
+  echo "  Manifest expects: $MANIFEST_GAME_VERSION" >&2
+  echo "Run the release flow again to update build_on_game_version, then retry." >&2
+  exit 1
+fi
 
 # --- Read mod version ---
 VERSION=$(python3 -c "import json; print(json.load(open('$MANIFEST'))['version'])")
@@ -88,22 +58,9 @@ ZIP="$MOD-$VERSION.zip"
 
 echo "==> Mod:              $MOD"
 echo "==> Mod version:      $VERSION"
-echo "==> Game version:     $GAME_VERSION"
+echo "==> Game version:     $GAME_VERSION (verified)"
 echo "==> Tag:              $TAG"
 echo ""
-
-# --- Update build_on_game_version in manifest ---
-echo "==> Updating build_on_game_version in manifest..."
-python3 - <<PYEOF
-import json, sys
-path = '$MANIFEST'
-with open(path) as f:
-    data = json.load(f)
-data['build_on_game_version'] = '$GAME_VERSION'
-with open(path, 'w') as f:
-    json.dump(data, f, indent=2)
-    f.write('\n')
-PYEOF
 
 # --- Build ---
 echo "==> Building..."
@@ -112,7 +69,7 @@ dotnet build "$MOD_DIR/$MOD.csproj" --configuration Release
 # --- Collect artifacts ---
 echo "==> Collecting artifacts..."
 DIST=$(mktemp -d)
-trap 'rm -rf "$DIST"' EXIT
+trap 'rm -rf "$DIST"; rm -f "$ZIP"' EXIT
 
 ASSEMBLY=$(echo "$MOD" | tr '-' '_')
 DLL="$MOD_DIR/.godot/mono/temp/bin/Release/${ASSEMBLY}.dll"
@@ -130,6 +87,21 @@ cp "$MANIFEST" "$DIST/"
 echo "==> Packaging $ZIP..."
 (cd "$DIST" && zip -r - .) > "$ZIP"
 
+# --- Wait for prerelease to be created by GitHub Actions ---
+echo "==> Waiting for prerelease $TAG to be available..."
+for i in $(seq 1 12); do
+  if gh release view "$TAG" &>/dev/null; then
+    echo "    Prerelease found."
+    break
+  fi
+  if [[ $i -eq 12 ]]; then
+    echo "Error: prerelease $TAG not found after 60s. Check GitHub Actions." >&2
+    exit 1
+  fi
+  echo "    Not ready yet, retrying in 5s... ($i/12)"
+  sleep 5
+done
+
 # --- Upload to prerelease ---
 echo "==> Uploading $ZIP to release $TAG..."
 gh release upload "$TAG" "$ZIP"
@@ -140,5 +112,3 @@ gh release edit "$TAG" --prerelease=false
 
 echo ""
 echo "Done! Release published: https://github.com/$(gh repo view --json nameWithOwner -q .nameWithOwner)/releases/tag/$TAG"
-
-rm -f "$ZIP"

@@ -63,9 +63,21 @@ Show:
 
 Wait for user to confirm or override before proceeding.
 
-#### 2e. Update version in manifest
+#### 2e. Update version and game version in manifest
 
-After user confirms, edit `mods/<mod>/<mod>.json` — update the `version` field to the new version (keep the `v` prefix, e.g. `v1.0.1`). Do **not** touch `build_on_game_version` — `scripts/release.sh` reads `release_info.json` from the local game installation and updates it automatically at build time.
+After user confirms:
+
+1. Read the current game version from the local installation:
+
+   ```bash
+   cat "<Sts2Path>/release_info.json"   # Sts2Path is in mods/<mod>/Directory.Build.props
+   ```
+
+2. Edit `mods/<mod>/<mod>.json` — update **both** fields:
+   - `version` → new version (keep the `v` prefix, e.g. `v1.0.1`)
+   - `build_on_game_version` → value from `release_info.json` → `version`
+
+Show the user both values before proceeding so they can confirm the game version is correct.
 
 #### 2f. Update root README version
 
