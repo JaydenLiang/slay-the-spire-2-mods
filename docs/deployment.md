@@ -65,7 +65,7 @@ Wait for user to confirm or override before proceeding.
 
 #### 2e. Update version in manifest
 
-After user confirms, edit `mods/<mod>/<mod>.json` — update the `version` field to the new version (keep the `v` prefix, e.g. `v1.0.1`).
+After user confirms, edit `mods/<mod>/<mod>.json` — update the `version` field to the new version (keep the `v` prefix, e.g. `v1.0.1`). Do **not** touch `build_on_game_version` — `scripts/release.sh` reads `release_info.json` from the local game installation and updates it automatically at build time.
 
 #### 2f. Update root README version
 
