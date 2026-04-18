@@ -3,6 +3,12 @@
 <!-- AI: append a new entry after each work session. Do not edit previous entries. -->
 <!-- Format: ## YYYY-MM-DD [Stage] — brief summary, then bullet points -->
 
+## 2026-04-17 [CHORE] — rewrite sub-agent docs and coding guide for clarity
+
+- Rewrote `.claude/agents/code-writer.md`, `code-reviewer.md`, `lessons-collector.md`: unified Step N structure, removed conflicting/append-only patches, consistent lessons file convention
+- Rewrote `docs/coding-guide.md`: reorganized into linear flow (read → write → review → collect lessons → maintain dev-lessons), moved knowledge write-back rules next to code-writer section
+- Rewrote `docs/sub-agents.md`: expanded Typical Workflow diagram to show review loop and CHANGES REQUIRED branch explicitly
+
 ## 2026-04-17 [CHORE] — migrate sub-agents to official .claude/agents/ format
 
 - Migrated `code-reviewer` and `lessons-collector` from `docs/sub-agents-prompts/` to `.claude/agents/`
