@@ -25,6 +25,7 @@ Read `.ai-stage` for the current stage value.
 - `CHANGELOG.md` — solution-level changelog; only major/cross-cutting changes go here
 - `mods/<mod-name>/CHANGELOG.md` — per-mod changelog; all mod-specific changes go here
 - `docs/coding-guide.md` — coding conventions and AI behavior rules; always follow these
+- `docs/dev-lessons.md` — hard-won build/toolchain/API lessons; check before starting new work
 
 ### Changelog Convention
 

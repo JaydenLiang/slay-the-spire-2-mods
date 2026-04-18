@@ -15,5 +15,6 @@ Properties/
 packages/
 .editorconfig
 .claude/
+docs/dev-lessons.md
 *.user
 Directory.Build.props
