@@ -2,6 +2,7 @@ using Godot;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Multiplayer.Game;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Nodes;
 using MegaCrit.Sts2.Core.Runs;
 
@@ -20,6 +21,7 @@ public static class InputPatch
             && RunManager.Instance?.IsInProgress == true
             && RunManager.Instance?.IsGameOver != true
             && RunManager.Instance?.NetService?.Type != NetGameType.Replay
+            && NGame.Instance != null
             && !NGame.Instance.Transition.InTransition)
         {
             TaskHelper.RunSafely(ReloadRunManager.DoReload());
@@ -28,7 +30,7 @@ public static class InputPatch
         if (key.Keycode == Key.F6 && RunManager.Instance?.IsInProgress != true)
         {
             SoloMultiplayerPatch.Enabled = !SoloMultiplayerPatch.Enabled;
-            MainFile.Logger.Info($"Solo multiplayer mode: {(SoloMultiplayerPatch.Enabled ? "ON" : "OFF")}");
+            Log.Warn($"Solo multiplayer mode: {(SoloMultiplayerPatch.Enabled ? "ON" : "OFF")}");
         }
     }
 }
