@@ -11,6 +11,11 @@
 - Updated `docs/workflows/github.md`: added conventional commit + scope rules, replaced npm-based Release Flow with AI-driven pointer to deployment.md
 - Updated `docs/coding-guide.md`: added commit scope convention note
 
+## 2026-04-18 [CHORE] — update README structure with mod table and per-mod READMEs
+
+- Rewrote root `README.md`: added mod table linking to per-mod READMEs; structured for easy addition of future mods
+- Created `mods/reload-run/README.md`: feature overview for F5 room reload and F6 solo multiplayer toggle
+
 ## 2026-04-18 [CHORE] — update github workflow merge strategy to no-ff
 
 - Updated `docs/workflows/github.md`: replaced `gh pr merge --squash` with local no-ff merge to preserve full commit history
