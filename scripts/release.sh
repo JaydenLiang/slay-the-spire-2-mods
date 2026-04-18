@@ -76,6 +76,7 @@ fi
 VERSION=$(python3 -c "import json; print(json.load(open('$MANIFEST'))['version'])")
 TAG="$MOD/$VERSION"
 ZIP="$MOD-$VERSION.zip"
+ZIPPATH="$(pwd)/$ZIP"
 
 echo "==> Mod:              $MOD"
 echo "==> Mod version:      $VERSION"
@@ -106,7 +107,6 @@ cp "$MANIFEST" "$DIST/"
 
 # --- Package ---
 echo "==> Packaging $ZIP..."
-ZIPPATH="$(pwd)/$ZIP"
 (cd "$DIST" && zip -r "$ZIPPATH" .)
 
 # --- Wait for prerelease to be created by GitHub Actions ---
@@ -125,7 +125,7 @@ for i in $(seq 1 12); do
 done
 
 # --- Upload to prerelease ---
-echo "==> Uploading $ZIP to release $TAG..."
+echo "==> Uploading $ZIPPATH to release $TAG..."
 gh release upload "$TAG" "$ZIPPATH"
 
 # --- Promote to full release ---
