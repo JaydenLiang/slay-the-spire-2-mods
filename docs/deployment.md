@@ -123,7 +123,7 @@ The script will:
 4. Upload the zip to the GitHub prerelease
 5. Promote the prerelease to a full release
 
-The user should run this script while GitHub Actions is creating the prerelease — both can happen in parallel.
+Run this script immediately after pushing — the script will wait (up to 60s) for GitHub Actions to finish creating the prerelease before uploading.
 
 ---
 
@@ -182,14 +182,16 @@ permissions:
   contents: write
 ```
 
-### `gh release upload` fails — prerelease not found
+### Script exits with "prerelease not found after 60s"
 
-**Symptom:** Script exits with "release not found" when uploading.
+**Symptom:** Script polls for 60s but the prerelease never appears.
 
-**Cause:** GitHub Actions hasn't finished creating the prerelease yet.
+**Cause:** GitHub Actions workflow failed or was not triggered (e.g. tag was not pushed, or workflow has a 403 error).
 
-**Fix:** Wait a few seconds and retry. The prerelease creation is fast but not instant. You can check status with:
+**Fix:** Check GitHub Actions status and fix the workflow, then re-push the tag or manually create the prerelease:
 
 ```bash
-gh release list
+gh release create "<mod>/<version>" --prerelease --generate-notes --title "<mod> <version>"
 ```
+
+Then re-run the script.

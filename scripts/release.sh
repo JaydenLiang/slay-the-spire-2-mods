@@ -90,7 +90,7 @@ dotnet build "$MOD_DIR/$MOD.csproj" --configuration Release
 # --- Collect artifacts ---
 echo "==> Collecting artifacts..."
 DIST=$(mktemp -d)
-trap 'rm -rf "$DIST"' EXIT
+trap 'rm -rf "$DIST"; rm -f "$ZIPPATH"' EXIT
 
 ASSEMBLY=$(echo "$MOD" | tr '-' '_')
 DLL="$MOD_DIR/.godot/mono/temp/bin/Release/${ASSEMBLY}.dll"
@@ -106,7 +106,8 @@ cp "$MANIFEST" "$DIST/"
 
 # --- Package ---
 echo "==> Packaging $ZIP..."
-(cd "$DIST" && zip -r - .) > "$ZIP"
+ZIPPATH="$(pwd)/$ZIP"
+(cd "$DIST" && zip -r "$ZIPPATH" .)
 
 # --- Wait for prerelease to be created by GitHub Actions ---
 echo "==> Waiting for prerelease $TAG to be available..."
@@ -125,10 +126,7 @@ done
 
 # --- Upload to prerelease ---
 echo "==> Uploading $ZIP to release $TAG..."
-gh release upload "$TAG" "$ZIP"
-
-# Zip uploaded — clean up
-rm -f "$ZIP"
+gh release upload "$TAG" "$ZIPPATH"
 
 # --- Promote to full release ---
 echo "==> Promoting prerelease to release..."
