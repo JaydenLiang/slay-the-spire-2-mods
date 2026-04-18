@@ -3,6 +3,10 @@
 <!-- AI: append a new entry after each work session. Do not edit previous entries. -->
 <!-- Format: ## YYYY-MM-DD [Stage] — brief summary, then bullet points -->
 
+## 2026-04-17 [CODING] — reload-run mod initial implementation
+
+- reload-run has new updates, see details in: mods/reload-run/CHANGELOG.md
+
 ## 2026-04-17 [CHORE] — add coding guide and AI sub-agent conventions
 
 - Created `docs/coding-guide.md`: rules for using sub-agents to read decompiled source files and write code

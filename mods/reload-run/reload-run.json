@@ -1,0 +1,11 @@
+{
+  "id": "reload_run",
+  "name": "reload_run",
+  "author": "Jayden Liang",
+  "description": "Press F5 during a run to instantly reload the current room. Press F6 on the main menu to toggle solo multiplayer mode.",
+  "version": "v1.1.0",
+  "has_pck": false,
+  "has_dll": true,
+  "dependencies": [],
+  "affects_gameplay": false
+}
