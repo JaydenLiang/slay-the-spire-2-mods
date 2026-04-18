@@ -1,0 +1,58 @@
+name: Release reload-run
+
+on:
+  push:
+    tags:
+      - 'reload-run/v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('**/**.csproj') }}
+          restore-keys: nuget-
+
+      - name: Read version from manifest
+        id: version
+        run: echo "MOD_VERSION=$(jq -r '.version' mods/reload-run/reload-run.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: dotnet build mods/reload-run/reload-run.csproj --configuration Release
+
+      - name: Package artifacts
+        run: |
+          mkdir -p dist
+          cp mods/reload-run/.godot/mono/temp/bin/Release/reload_run.dll dist/
+          cp mods/reload-run/reload-run.json dist/
+          cd dist && zip ../reload-run-${{ steps.version.outputs.MOD_VERSION }}.zip ./*
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "reload-run ${{ steps.version.outputs.MOD_VERSION }}" \
+            --generate-notes \
+            "reload-run-${{ steps.version.outputs.MOD_VERSION }}.zip"
+
+      - name: Release failed — see troubleshooting guide
+        if: failure()
+        run: |
+          echo "::error::Release creation failed. If you see a 403 error, check that 'permissions: contents: write' is set in the workflow."
+          echo "::error::See docs/deployment.md — Troubleshooting section for fix instructions."
