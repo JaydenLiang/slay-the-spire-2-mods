@@ -3,6 +3,10 @@
 <!-- AI: append a new entry after each work session. Do not edit previous entries. -->
 <!-- Format: ## YYYY-MM-DD [Stage] — brief summary, then bullet points -->
 
+## 2026-04-18 [CHORE] — update github workflow merge strategy to no-ff
+
+- Updated `docs/workflows/github.md`: replaced `gh pr merge --squash` with local no-ff merge to preserve full commit history
+
 ## 2026-04-17 [CHORE] — rewrite sub-agent docs and coding guide for clarity
 
 - Rewrote `.claude/agents/code-writer.md`, `code-reviewer.md`, `lessons-collector.md`: unified Step N structure, removed conflicting/append-only patches, consistent lessons file convention
