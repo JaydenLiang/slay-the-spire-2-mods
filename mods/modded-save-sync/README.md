@@ -1,5 +1,7 @@
 # modded-save-sync
 
+English | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md)
+
 A [Slay the Spire 2](https://store.steampowered.com/app/2868840/Slay_the_Spire_2/) mod by **Jayden Liang**.
 
 ## Features
@@ -8,7 +10,7 @@ A [Slay the Spire 2](https://store.steampowered.com/app/2868840/Slay_the_Spire_2
 
 STS2 normally stores saves in separate directories depending on whether mods are active:
 
-```
+```text
 %APPDATA%\SlayTheSpire2\steam\<STEAM_ID>\
     profile1\          ← vanilla saves
     modded\profile1\   ← modded saves
