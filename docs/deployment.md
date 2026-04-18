@@ -63,18 +63,30 @@ Show:
 
 Wait for user to confirm or override before proceeding.
 
-#### 2e. Update version in manifest
+#### 2e. Update version and game version in manifest
 
-After user confirms, edit `mods/<mod>/<mod>.json` — update the `version` field to the new version (keep the `v` prefix, e.g. `v1.0.1`).
+After user confirms:
+
+1. Read the current game version from the local installation:
+
+   ```bash
+   cat "<Sts2Path>/release_info.json"   # Sts2Path is in mods/<mod>/Directory.Build.props
+   ```
+
+2. Edit `mods/<mod>/<mod>.json` — update **both** fields:
+   - `version` → new version (keep the `v` prefix, e.g. `v1.0.1`)
+   - `build_on_game_version` → value from `release_info.json` → `version`
+
+Show the user both values before proceeding so they can confirm the game version is correct.
 
 #### 2f. Update root README version
 
-Edit `README.md` — update the `Version` column for this mod in the Mods table to `<new-version>`.
+Edit `README.md`, `README.zh-CN.md`, and `README.zh-TW.md` — update the `Version` column for this mod in the Mods table to `<new-version>`.
 
-#### 2g. Commit and tag
+#### 2g. Commit, tag, and push
 
 ```bash
-git add mods/<mod>/<mod>.json README.md
+git add mods/<mod>/<mod>.json README.md README.zh-CN.md README.zh-TW.md
 git commit -m "chore(<mod>): bump version to <new-version>"
 git tag <mod>/<new-version>
 ```
@@ -93,7 +105,25 @@ If yes:
 git push && git push --tags
 ```
 
-Pushing the tag triggers GitHub Actions to build and publish the GitHub Release automatically.
+Pushing the tag triggers GitHub Actions to create a **prerelease** on GitHub automatically.
+
+### Step 4 — Local build and publish
+
+After pushing, instruct the user to run the release script for each mod:
+
+```bash
+./scripts/release.sh <mod-name>
+```
+
+The script will:
+
+1. Build the mod locally with `dotnet build --configuration Release`
+2. Collect the DLL from `.godot/mono/temp/bin/Release/` and the JSON manifest
+3. Package them into `<mod>-<version>.zip`
+4. Upload the zip to the GitHub prerelease
+5. Promote the prerelease to a full release
+
+Run this script immediately after pushing — the script will wait (up to 60s) for GitHub Actions to finish creating the prerelease before uploading.
 
 ---
 
@@ -104,13 +134,7 @@ Each mod has its own workflow file:
 - `.github/workflows/release-modded-save-sync.yml`
 - `.github/workflows/release-reload-run.yml`
 
-The workflow:
-
-1. Builds the mod with `dotnet build --configuration Release`
-2. Packages `<assembly>.dll` + `<mod>.json` into `<mod>-<version>.zip`
-3. Creates a GitHub Release with the zip attached
-
-No manual action needed after pushing the tag.
+The workflow only creates the prerelease with auto-generated notes. It does **not** build or package — that is handled locally by `scripts/release.sh`.
 
 ---
 
@@ -129,10 +153,11 @@ To undo after push:
 # Delete the remote tag (stops CI from re-triggering)
 git push origin --delete <mod>/<version>
 
-# Delete the GitHub Release manually via:
-gh release delete <mod>/<version> --yes
+# Delete the local tag
+git tag -d <mod>/<version>
 
-# Then fix and re-release with a new version
+# Delete the GitHub Release
+gh release delete <mod>/<version> --yes
 ```
 
 ---
@@ -140,15 +165,15 @@ gh release delete <mod>/<version> --yes
 ## Known Risks
 
 - If two mods are released in the same session and the push fails midway, only some tags may be on remote. Check `git tag` vs `git ls-remote --tags origin` to reconcile.
-- The `CI=true` env var suppresses the STS2 path check in the build. If the CI build fails, check the GitHub Actions log — it is likely a .NET or Godot SDK version mismatch.
+- The release script assumes the assembly name is the mod name with hyphens replaced by underscores (e.g. `reload-run` → `reload_run.dll`). If the `AssemblyName` in the csproj differs, update the script accordingly.
 
 ## Troubleshooting
 
-### CI fails with "403 Resource not accessible by integration" on `gh release create`
+### GitHub Actions fails with "403 Resource not accessible by integration"
 
-**Symptom:** Build succeeds but the release creation step fails with a 403 error.
+**Symptom:** The prerelease creation step fails with a 403 error.
 
-**Cause:** The workflow is missing `permissions: contents: write`. GitHub Actions' default `GITHUB_TOKEN` does not have write access to releases unless explicitly granted.
+**Cause:** The workflow is missing `permissions: contents: write`.
 
 **Fix:** Add this to the workflow file (`.github/workflows/release-<mod>.yml`):
 
@@ -156,3 +181,17 @@ gh release delete <mod>/<version> --yes
 permissions:
   contents: write
 ```
+
+### Script exits with "prerelease not found after 60s"
+
+**Symptom:** Script polls for 60s but the prerelease never appears.
+
+**Cause:** GitHub Actions workflow failed or was not triggered (e.g. tag was not pushed, or workflow has a 403 error).
+
+**Fix:** Check GitHub Actions status and fix the workflow, then re-push the tag or manually create the prerelease:
+
+```bash
+gh release create "<mod>/<version>" --prerelease --generate-notes --title "<mod> <version>"
+```
+
+Then re-run the script.

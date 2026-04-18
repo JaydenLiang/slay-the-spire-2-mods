@@ -16,43 +16,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '9.0.x'
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: nuget-${{ hashFiles('**/**.csproj') }}
-          restore-keys: nuget-
-
       - name: Read version from manifest
         id: version
-        run: echo "MOD_VERSION=$(jq -r '.version' mods/modded-save-sync/modded-save-sync.json)" >> "$GITHUB_OUTPUT"
-
-      - name: Build
-        run: dotnet build mods/modded-save-sync/modded-save-sync.csproj --configuration Release
-
-      - name: Package artifacts
         run: |
-          mkdir -p dist
-          cp mods/modded-save-sync/.godot/mono/temp/bin/Release/modded_save_sync.dll dist/
-          cp mods/modded-save-sync/modded-save-sync.json dist/
-          cd dist && zip ../modded-save-sync-${{ steps.version.outputs.MOD_VERSION }}.zip ./*
+          MOD_VERSION=$(python3 -c "import json; print(json.load(open('mods/modded-save-sync/modded-save-sync.json'))['version'])")
+          echo "MOD_VERSION=$MOD_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub Release
+      - name: Create prerelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ github.ref_name }}" \
             --title "modded-save-sync ${{ steps.version.outputs.MOD_VERSION }}" \
             --generate-notes \
-            "modded-save-sync-${{ steps.version.outputs.MOD_VERSION }}.zip"
-
-      - name: Release failed — see troubleshooting guide
-        if: failure()
-        run: |
-          echo "::error::Release creation failed. If you see a 403 error, check that 'permissions: contents: write' is set in the workflow."
-          echo "::error::See docs/deployment.md — Troubleshooting section for fix instructions."
+            --prerelease
