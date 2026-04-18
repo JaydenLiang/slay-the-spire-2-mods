@@ -67,10 +67,14 @@ Wait for user to confirm or override before proceeding.
 
 After user confirms, edit `mods/<mod>/<mod>.json` — update the `version` field to the new version (keep the `v` prefix, e.g. `v1.0.1`).
 
-#### 2f. Commit and tag
+#### 2f. Update root README version
+
+Edit `README.md` — update the `Version` column for this mod in the Mods table to `<new-version>`.
+
+#### 2g. Commit and tag
 
 ```bash
-git add mods/<mod>/<mod>.json
+git add mods/<mod>/<mod>.json README.md
 git commit -m "chore(<mod>): bump version to <new-version>"
 git tag <mod>/<new-version>
 ```
