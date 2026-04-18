@@ -6,8 +6,23 @@
 # then promotes it to a full release.
 #
 # Prerequisites: dotnet, gh (GitHub CLI), zip, python3
+# Must be run from the repository root.
 
 set -euo pipefail
+
+# --- Ensure running from repo root ---
+if [[ ! -f "README.md" || ! -d "mods" ]]; then
+  echo "Error: must be run from the repository root." >&2
+  exit 1
+fi
+
+# --- Check prerequisites ---
+for cmd in dotnet gh zip python3; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo "Error: required command not found: $cmd" >&2
+    exit 1
+  fi
+done
 
 MOD="${1:-}"
 if [[ -z "$MOD" ]]; then
@@ -27,10 +42,16 @@ fi
 PROPS="$MOD_DIR/Directory.Build.props"
 STS2_PATH=""
 if [[ -f "$PROPS" ]]; then
-  STS2_PATH=$(grep -oP '(?<=<Sts2Path>)[^<]+' "$PROPS" 2>/dev/null || true)
+  STS2_PATH=$(python3 -c "
+import re, sys
+content = open('$PROPS').read()
+m = re.search(r'<Sts2Path>([^<]+)</Sts2Path>', content)
+print(m.group(1).strip()) if m else print('')
+" 2>/dev/null || true)
 fi
 if [[ -z "$STS2_PATH" || ! -d "$STS2_PATH" ]]; then
-  echo "Error: could not read Sts2Path from $PROPS" >&2
+  echo "Error: could not read a valid Sts2Path from $PROPS" >&2
+  echo "Make sure Sts2Path is set and the directory exists." >&2
   exit 1
 fi
 
@@ -45,7 +66,7 @@ MANIFEST_GAME_VERSION=$(python3 -c "import json; print(json.load(open('$MANIFEST
 
 if [[ "$GAME_VERSION" != "$MANIFEST_GAME_VERSION" ]]; then
   echo "Error: game version mismatch!" >&2
-  echo "  Installed game:  $GAME_VERSION" >&2
+  echo "  Installed game:   $GAME_VERSION" >&2
   echo "  Manifest expects: $MANIFEST_GAME_VERSION" >&2
   echo "Run the release flow again to update build_on_game_version, then retry." >&2
   exit 1
@@ -69,7 +90,7 @@ dotnet build "$MOD_DIR/$MOD.csproj" --configuration Release
 # --- Collect artifacts ---
 echo "==> Collecting artifacts..."
 DIST=$(mktemp -d)
-trap 'rm -rf "$DIST"; rm -f "$ZIP"' EXIT
+trap 'rm -rf "$DIST"' EXIT
 
 ASSEMBLY=$(echo "$MOD" | tr '-' '_')
 DLL="$MOD_DIR/.godot/mono/temp/bin/Release/${ASSEMBLY}.dll"
@@ -105,6 +126,9 @@ done
 # --- Upload to prerelease ---
 echo "==> Uploading $ZIP to release $TAG..."
 gh release upload "$TAG" "$ZIP"
+
+# Zip uploaded — clean up
+rm -f "$ZIP"
 
 # --- Promote to full release ---
 echo "==> Promoting prerelease to release..."
