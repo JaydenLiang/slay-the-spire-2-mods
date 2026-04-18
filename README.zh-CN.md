@@ -8,7 +8,7 @@
 
 | Mod | 版本 | 说明 |
 | --- | --- | --- |
-| [modded-save-sync](mods/modded-save-sync/README.md) | v1.0.0 | 统一原版与 mod 版存档路径，存档不再分裂成两份 |
+| [modded-save-sync](mods/modded-save-sync/README.md) | v1.1.0 | 统一原版与 mod 版存档路径，存档不再分裂成两份 |
 | [reload-run](mods/reload-run/README.md) | v1.1.0 | 按 F5 从房间入口存档重新载入当前房间；按 F6 以单人模式开启多人对局 |
 
 ## 安装指南
