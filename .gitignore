@@ -14,6 +14,8 @@ publish/
 Properties/
 packages/
 .editorconfig
-.claude/
+.claude/tmp/
+.claude/dev-lessons-gist-id
+docs/dev-lessons.md
 *.user
 Directory.Build.props
