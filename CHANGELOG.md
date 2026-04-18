@@ -3,6 +3,14 @@
 <!-- AI: append a new entry after each work session. Do not edit previous entries. -->
 <!-- Format: ## YYYY-MM-DD [Stage] — brief summary, then bullet points -->
 
+## 2026-04-17 [CHORE] — migrate sub-agents to official .claude/agents/ format
+
+- Migrated `code-reviewer` and `lessons-collector` from `docs/sub-agents-prompts/` to `.claude/agents/`
+- Added new `code-writer` sub-agent
+- Added `docs/sub-agents.md`: agent index, file format reference, typical workflow
+- Updated `docs/coding-guide.md`: all agent references point to `.claude/agents/`, added task file convention, lifecycle rules for task/lessons/review temp files
+- Updated `.gitignore`: replaced `.claude/` blanket ignore with `.claude/tmp/` and `.claude/dev-lessons-gist-id`
+
 ## 2026-04-17 [CODING] — reload-run mod initial implementation
 
 - reload-run has new updates, see details in: mods/reload-run/CHANGELOG.md

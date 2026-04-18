@@ -33,6 +33,16 @@ Delegate actual code writing to sub-agents to keep the main conversation context
 
 Sub-agents are **not free** — each starts cold and reloads system prompt and memory. The real benefit is keeping the **main conversation context lean**, which matters most in long or complex sessions. For short one-off tasks, writing code directly in the main context is more economical.
 
+### Task files
+
+The main agent creates a task file before spawning `code-writer`:
+
+- **Location:** `.claude/tmp/`
+- **Naming:** `task-<short-description>-<YYYYMMDD>.md` e.g. `task-reload-run-fix-20260417.md`
+- **Responsibility:** the main agent must include enough information that code-writer can complete the task without asking for clarification — goal, relevant file paths, requirements, and any context links
+
+The main agent deletes the task file after the review loop returns `APPROVED`.
+
 ### After writing code
 
 After completing a coding task, the sub-agent **must** write back any knowledge gained:
@@ -48,14 +58,10 @@ After completing a non-trivial coding task, spawn a code review sub-agent to cat
 
 ### How to invoke
 
-Read **both** prompt files and concatenate them to form the reviewer's system prompt:
+Use the `code-reviewer` sub-agent (`.claude/agents/code-reviewer.md`). Pass:
 
-1. `docs/sub-agents-prompts/code-reviewer-basic.md` — base persona and review axes
-2. `.claude/prompts/code-reviewer.md` — project-specific overrides (may be empty)
-
-Then pass:
 - The list of **code file paths** to review
-- The **findings file path** — `.claude/tmp/review-<session>.md` (same file reused across all rounds)
+- The **findings file path** — `.claude/tmp/review-<mod-name>-<YYYYMMDD>.md` (same file reused across all rounds)
 
 The reviewer reads the files itself. Do not paste file contents into the prompt.
 
@@ -69,11 +75,12 @@ The reviewer reads the files itself. Do not paste file contents into the prompt.
 
 Code review is a **multi-round loop** — repeat until the reviewer approves:
 
-1. Create the findings file path: `.claude/tmp/review-<mod-name>-<date>.md`
-2. Spawn a code-reviewer agent with: combined prompt + code file paths + findings file path
-3. Reviewer reads files, appends round results to findings file, returns verdict
-4. If `CHANGES REQUIRED`: spawn a code-writer agent with the findings file path to fix issues
+1. Create the review findings file: `.claude/tmp/review-<mod-name>-<YYYYMMDD>.md`
+2. Use the `code-reviewer` sub-agent with: code file paths + review findings file path
+3. Reviewer appends round results to review findings file, appends lessons to `lessons-<short-description>-<YYYYMMDD>.md`, returns verdict + lessons file path
+4. If `CHANGES REQUIRED`: create `.claude/tmp/task-<short-description>-<YYYYMMDD>.md` with sufficient information for code-writer to fix all issues without asking, then use the `code-writer` sub-agent with the task file path
 5. Repeat from step 2 until reviewer returns `APPROVED`
+6. Delete the task file
 
 The main agent only passes file paths each round — never file contents.
 
@@ -85,21 +92,24 @@ After the review loop ends with `APPROVED`, spawn a lessons-collector agent to e
 
 ### How sub-agents report findings
 
-Coding and code-review sub-agents write raw findings to a temporary file during their work:
+Both `code-writer` and `code-reviewer` agents write raw findings to a lessons temp file:
 
-- **Location:** `.claude/tmp/`
-- **Naming:** `lessons-<short-description>-<timestamp>.md` e.g. `lessons-reload-run-20260417.md`
-- **Content:** raw bullet points — what went wrong, what was surprising, what the fix was
-- Sub-agents append to the file (do not overwrite) if multiple agents share one file for a session
+- `code-writer` — lessons from implementation (unexpected API behavior, gotchas, constraints)
+- `code-reviewer` — lessons from review (patterns that cause bugs or over-engineering)
 
-The sub-agent returns the file path in its response so the main agent can collect it.
+**Location:** `.claude/tmp/`
+**Naming:** `lessons-<short-description>-<YYYYMMDD>.md` e.g. `lessons-reload-run-20260417.md`
+**Content:** raw bullet points — what went wrong, what was surprising, what the fix was
+**Rule:** append to the file if it already exists; do not overwrite
+
+Each agent returns the lessons file path in its response so the main agent can collect it.
 
 ### How to invoke the lessons-collector
 
 Once the review loop is `APPROVED`, pass all collected temporary file paths to the lessons-collector:
 
-1. Read `docs/sub-agents-prompts/lessons-collector.md`
-2. Spawn a general-purpose agent with that prompt + the list of temp file paths
+1. Use the `lessons-collector` sub-agent (`.claude/agents/lessons-collector.md`)
+2. Pass all collected temp file paths — both `lessons-<...>.md` and `review-<...>.md` files
 3. The agent reads the files, writes new lessons to `docs/dev-lessons.md`, deletes the temp files
 4. It returns `LESSONS SAVED` or `NOTHING NEW`
 
