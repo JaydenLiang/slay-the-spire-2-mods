@@ -1,5 +1,18 @@
 # Coding Guide
 
+## Commit Message Convention
+
+When committing changes that affect a specific mod, always include the mod name as the conventional commit scope:
+
+```text
+feat(reload-run): add F6 solo mode
+fix(modded-save-sync): correct save path on Linux
+```
+
+This is required for automated version bump inference during release. Commits without a mod scope are ignored by the release flow. See `docs/deployment.md` for details.
+
+---
+
 ## Reading Decompiled Source Files
 
 When you need to read decompiled game source files (from Rider's DecompilerCache):

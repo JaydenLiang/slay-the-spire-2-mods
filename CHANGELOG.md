@@ -3,6 +3,14 @@
 <!-- AI: append a new entry after each work session. Do not edit previous entries. -->
 <!-- Format: ## YYYY-MM-DD [Stage] — brief summary, then bullet points -->
 
+## 2026-04-18 [CHORE] — add release pipeline (GitHub Actions + deployment docs)
+
+- Created `.github/workflows/release-modded-save-sync.yml` and `release-reload-run.yml`: build on tag push, package DLL + JSON into zip, publish GitHub Release
+- Updated both csproj files: conditionalize `CheckDependencyPaths` and `CopyToModsFolderOnBuild` on `CI` env var; pinned `Alchyr.Sts2.BaseLib` to `3.0.6` and `Alchyr.Sts2.ModAnalyzers` to `0.1.9`
+- Filled in `docs/deployment.md`: AI-driven release flow, commit scope convention, bump inference rules, rollback steps, troubleshooting
+- Updated `docs/workflows/github.md`: added conventional commit + scope rules, replaced npm-based Release Flow with AI-driven pointer to deployment.md
+- Updated `docs/coding-guide.md`: added commit scope convention note
+
 ## 2026-04-18 [CHORE] — update README structure with mod table and per-mod READMEs
 
 - Rewrote root `README.md`: added mod table linking to per-mod READMEs; structured for easy addition of future mods
