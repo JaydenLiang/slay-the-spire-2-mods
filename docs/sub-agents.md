@@ -9,6 +9,8 @@ All sub-agents live in `.claude/agents/` as Markdown files with YAML frontmatter
 | `code-writer` | `.claude/agents/code-writer.md` | sonnet | Read, Write, Edit, Glob, Grep, Bash | Implements code changes and new features |
 | `code-reviewer` | `.claude/agents/code-reviewer.md` | sonnet | Read, Glob, Grep, Write | Reviews code for bugs and over-engineering |
 | `lessons-collector` | `.claude/agents/lessons-collector.md` | sonnet | Read, Write, Bash | Extracts reusable lessons, merges with Gist remote, syncs back to Gist |
+| `mod-release-notes-writer` | `.claude/agents/mod-release-notes-writer.md` | sonnet | Read, Glob, Grep, Bash | Distills commit logs into user-friendly release notes |
+| `release-publisher` | `.claude/agents/release-publisher.md` | sonnet | Read, Write, Bash | Executes mechanical release steps: tag, build, upload, update notes |
 
 ## Agent File Format
 
