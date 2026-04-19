@@ -146,11 +146,26 @@ The manifest file has this structure:
    See the [Mod Installation Guide](https://github.com/<repo>#mod-installation-guide) in the repository README.
    ```
 
-5. **Clean up**
+5. **Verify release**
+   After updating notes, verify the release is as expected:
+   ```bash
+   gh release view "<tag>" --json name,tagName,isDraft,isPrerelease,assets,body
+   ```
+   Check:
+   - `isDraft` is `false`
+   - `isPrerelease` is `false`
+   - `assets` contains the zip file
+   - `body` is not empty and contains the expected notes
+
+   If any check fails, report the specific issue and stop.
+
+6. **Clean up**
    Delete `.claude/tmp/release-analysis-<mod>.json` and the notes file.
 
-6. **Report**
+7. **Report**
    Return:
    ```
    ✓ <mod> <version> published — https://github.com/<repo>/releases/tag/<tag>
+   Asset : <zip filename>
+   Notes : <first bullet point from What's New>
    ```
