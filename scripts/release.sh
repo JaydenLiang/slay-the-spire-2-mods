@@ -5,7 +5,7 @@
 # Builds the mod, packages artifacts into a zip, uploads to the GitHub prerelease,
 # then promotes it to a full release.
 #
-# Prerequisites: dotnet, gh (GitHub CLI), zip, python3
+# Prerequisites: dotnet, gh (GitHub CLI), zip
 # Must be run from the repository root.
 
 set -euo pipefail
@@ -17,7 +17,7 @@ if [[ ! -f "README.md" || ! -d "mods" ]]; then
 fi
 
 # --- Check prerequisites ---
-for cmd in dotnet gh zip python3; do
+for cmd in dotnet gh; do
   if ! command -v "$cmd" &>/dev/null; then
     echo "Error: required command not found: $cmd" >&2
     exit 1
@@ -42,12 +42,7 @@ fi
 PROPS="$MOD_DIR/Directory.Build.props"
 STS2_PATH=""
 if [[ -f "$PROPS" ]]; then
-  STS2_PATH=$(python3 -c "
-import re, sys
-content = open('$PROPS').read()
-m = re.search(r'<Sts2Path>([^<]+)</Sts2Path>', content)
-print(m.group(1).strip()) if m else print('')
-" 2>/dev/null || true)
+  STS2_PATH=$(sed -n 's/.*<Sts2Path>\([^<]*\)<\/Sts2Path>.*/\1/p' "$PROPS" | tr -d '[:space:]')
 fi
 if [[ -z "$STS2_PATH" || ! -d "$STS2_PATH" ]]; then
   echo "Error: could not read a valid Sts2Path from $PROPS" >&2
@@ -61,8 +56,8 @@ if [[ ! -f "$RELEASE_INFO" ]]; then
   exit 1
 fi
 
-GAME_VERSION=$(python3 -c "import json; print(json.load(open('$RELEASE_INFO'))['version'])")
-MANIFEST_GAME_VERSION=$(python3 -c "import json; print(json.load(open('$MANIFEST')).get('build_on_game_version', ''))")
+GAME_VERSION=$(sed -n 's/.*"version": "\([^"]*\)".*/\1/p' "$RELEASE_INFO" | head -1)
+MANIFEST_GAME_VERSION=$(sed -n 's/.*"build_on_game_version": "\([^"]*\)".*/\1/p' "$MANIFEST" | head -1)
 
 if [[ "$GAME_VERSION" != "$MANIFEST_GAME_VERSION" ]]; then
   echo "Error: game version mismatch!" >&2
@@ -73,7 +68,7 @@ if [[ "$GAME_VERSION" != "$MANIFEST_GAME_VERSION" ]]; then
 fi
 
 # --- Read mod version ---
-VERSION=$(python3 -c "import json; print(json.load(open('$MANIFEST'))['version'])")
+VERSION=$(sed -n 's/.*"version": "\([^"]*\)".*/\1/p' "$MANIFEST" | head -1)
 TAG="$MOD/$VERSION"
 ZIP="$MOD-$VERSION.zip"
 ZIPPATH="$(pwd)/$ZIP"
@@ -107,7 +102,7 @@ cp "$MANIFEST" "$DIST/"
 
 # --- Package ---
 echo "==> Packaging $ZIP..."
-(cd "$DIST" && zip -r "$ZIPPATH" .)
+python3 -c "import zipfile, os; z = zipfile.ZipFile('$ZIPPATH', 'w', zipfile.ZIP_DEFLATED); [z.write(os.path.join('$DIST', f), f) for f in os.listdir('$DIST')]; z.close()"
 
 # --- Wait for prerelease to be created by GitHub Actions ---
 echo "==> Waiting for prerelease $TAG to be available..."

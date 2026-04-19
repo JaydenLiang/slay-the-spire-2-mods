@@ -30,3 +30,13 @@ jobs:
             --title "reload-run ${{ steps.version.outputs.MOD_VERSION }}" \
             --generate-notes \
             --prerelease
+
+      - name: Append release info and installation guide reference
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CURRENT_NOTES=$(gh release view "${{ github.ref_name }}" --json body -q .body)
+          REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+          BUILD_ON=$(python3 -c "import json; print(json.load(open('mods/reload-run/reload-run.json'))['build_on_game_version'])")
+          printf '%s\n\n---\n\n## Release Info\n\n| | |\n|---|---|\n| Build on game version | %s |\n\n## Installation\n\nSee the [Mod Installation Guide](https://github.com/%s#mod-installation-guide) in the repository README.\n' "$CURRENT_NOTES" "$BUILD_ON" "$REPO" > /tmp/notes.md
+          gh release edit "${{ github.ref_name }}" --notes-file /tmp/notes.md
