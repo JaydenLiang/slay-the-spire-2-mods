@@ -16,6 +16,20 @@ Commits without a matching scope are excluded from bump inference.
 
 ---
 
+## Agent Responsibilities
+
+The release flow is split between main Claude and sub-agents:
+
+| Who | Responsibilities |
+| --- | --- |
+| **Main Claude** | All user interaction: mod selection, version confirmation, tag conflict decisions, push approval |
+| **`mod-release-notes-writer`** | Generate user-friendly release notes from commits |
+| **`release-publisher`** | Execute mechanical steps: tag, push, build, upload, update release notes |
+
+Main Claude writes a release manifest to `.claude/tmp/release-<mod>-<version>.json` before invoking `release-publisher`. All data flows through files, not context.
+
+---
+
 ## Release Flow
 
 ### Step 1 — Select mods to release
@@ -26,11 +40,27 @@ Run `ls mods/` to list available mods. Ask the user which mod(s) to release. Mul
 
 #### 2a. Find last release tag
 
+First, sync remote tags to ensure local state is up to date:
+
+```bash
+git fetch --tags
+```
+
+Then find the last tag:
+
 ```bash
 git tag --list '<mod>/v*' --sort=-version:refname | head -1
 ```
 
 If no tag exists yet, treat all commits touching `mods/<mod>/` as in scope.
+
+Before creating a new tag, verify the proposed tag does not already exist on remote:
+
+```bash
+git ls-remote --tags origin '<mod>/<new-version>'
+```
+
+If the tag already exists on remote, stop and ask the user: **"Tag `<mod>/<version>` already exists on remote. Skip this mod, or re-release (delete existing tag and release, then redo)?"**
 
 #### 2b. Collect commits since last tag
 
@@ -83,47 +113,45 @@ Show the user both values before proceeding so they can confirm the game version
 
 Edit `README.md`, `README.zh-CN.md`, and `README.zh-TW.md` — update the `Version` column for this mod in the Mods table to `<new-version>`.
 
-#### 2g. Commit, tag, and push
+#### 2g. Commit version bump
 
 ```bash
 git add mods/<mod>/<mod>.json README.md README.zh-CN.md README.zh-TW.md
 git commit -m "chore(<mod>): bump version to <new-version>"
-git tag <mod>/<new-version>
 ```
 
-### Step 3 — Summary and push
+#### 2h. Generate release notes
+
+Invoke `mod-release-notes-writer` with the commits collected in step 2b. Save the output to `.claude/tmp/release-notes-<mod>-<new-version>.md`.
+
+### Step 3 — Summary and confirm
 
 After processing all selected mods, show a summary:
 
-- Each mod: old version → new version, commit hash, tag
+- Each mod: old version → new version, commit hash
 
-Ask: **"Push now? [y/N]"**
+Ask: **"Publish now? [y/N]"**
 
-If yes:
+### Step 4 — Publish each mod
 
-```bash
-git push && git push --tags
+For each mod, after user confirms:
+
+1. Write a release manifest to `.claude/tmp/release-<mod>-<version>.json`:
+
+```json
+{
+  "mod": "<mod>",
+  "version": "<version>",
+  "tag": "<mod>/<version>",
+  "build_on_game_version": "<build_on_game_version>",
+  "repo": "<owner>/<repo>",
+  "notes": "<contents of .claude/tmp/release-notes-<mod>-<version>.md>"
+}
 ```
 
-Pushing the tag triggers GitHub Actions to create a **prerelease** on GitHub automatically.
+1. Invoke `release-publisher` agent with the manifest path.
 
-### Step 4 — Local build and publish
-
-After pushing, instruct the user to run the release script for each mod:
-
-```bash
-./scripts/release.sh <mod-name>
-```
-
-The script will:
-
-1. Build the mod locally with `dotnet build --configuration Release`
-2. Collect the DLL from `.godot/mono/temp/bin/Release/` and the JSON manifest
-3. Package them into `<mod>-<version>.zip`
-4. Upload the zip to the GitHub prerelease
-5. Promote the prerelease to a full release
-
-Run this script immediately after pushing — the script will wait (up to 60s) for GitHub Actions to finish creating the prerelease before uploading.
+1. Wait for `release-publisher` to report success before proceeding to the next mod.
 
 ---
 
