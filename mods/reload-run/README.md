@@ -26,5 +26,5 @@ Press **F6** on the main menu to toggle **solo multiplayer mode**, allowing a Ho
 | --- | --- |
 | Singleplayer F5 reload | Done, tested |
 | F6 solo multiplayer toggle | Done, tested |
-| Multiplayer Host F5 reload | Done, untested |
-| Multiplayer Client F5 reload | Done, untested |
+| Multiplayer Host F5 reload | Done, tested |
+| Multiplayer Client F5 reload | Done, tested |
