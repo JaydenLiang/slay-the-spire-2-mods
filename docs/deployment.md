@@ -126,11 +126,15 @@ Invoke `mod-release-notes-writer` with the commits collected in step 2b. Save th
 
 ### Step 3 — Summary and confirm
 
-After processing all selected mods, show a summary:
+After processing all selected mods, show a summary for each mod:
 
-- Each mod: old version → new version, commit hash
+- Old version → new version
+- Bump level and reason
+- Full release notes preview (read from `.claude/tmp/release-notes-<mod>-<new-version>.md`)
 
-Ask: **"Publish now? [y/N]"**
+Ask: **"Looks good? Publish now? [y/N]"**
+
+Wait for user to confirm or request changes before proceeding.
 
 ### Step 4 — Publish each mod
 
