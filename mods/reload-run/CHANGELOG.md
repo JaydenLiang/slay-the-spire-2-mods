@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Added diagnostic logging to `InputPatch`: F5 and F6 presses now log all guard-condition values to the game log for easier debugging after game updates.
+
 - Added F6 toggle for solo multiplayer mode: allows Host to start a new multiplayer run alone without waiting for other players to join (`SoloMultiplayerPatch` on `StartRunLobby.IsAboutToBeginGame`).
 - Fixed: `_reloadInProgress` guard to prevent re-entrant F5 presses during an in-flight reload.
 - Fixed: FadeIn now runs on the error path in `DoReload` so the screen is never left faded out.
