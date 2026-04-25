@@ -1,7 +1,8 @@
 # Changelog — reload-run
 
-## [Unreleased]
+## v1.1.1
 
+- Rebuilt against Slay the Spire 2 beta v0.104.0.
 - Added diagnostic logging to `InputPatch`: F5 and F6 presses now log all guard-condition values to the game log for easier debugging after game updates.
 
 - Added F6 toggle for solo multiplayer mode: allows Host to start a new multiplayer run alone without waiting for other players to join (`SoloMultiplayerPatch` on `StartRunLobby.IsAboutToBeginGame`).
