@@ -26,6 +26,7 @@ Read `.ai-stage` for the current stage value.
 - `mods/<mod-name>/CHANGELOG.md` — per-mod changelog; all mod-specific changes go here
 - `docs/coding-guide.md` — coding conventions and AI behavior rules; always follow these
 - `docs/dev-lessons.md` — hard-won build/toolchain/API lessons; check before starting new work
+- `docs/sub-agents.md` — sub-agent rules and workflows; **read this before invoking any sub-agent**
 
 ### Changelog Convention
 
@@ -73,6 +74,7 @@ If multiple workflows apply to the current action, read all of them.
 5. Before any code management action:
    a. Update `CHANGELOG.md` first — include it in the same commit.
    b. Check `.ai-workflow`, read the relevant `docs/workflows/*.md`, and follow it exactly.
+6. Before invoking any sub-agent, read `docs/sub-agents.md` and follow the rules there exactly.
 
 ## First-Time Setup (AI tools other than Claude Code)
 

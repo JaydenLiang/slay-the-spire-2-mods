@@ -39,14 +39,31 @@ Use the code-reviewer agent to review my changes
 @"code-reviewer (agent)" review MainFile.cs
 ```
 
-## Typical Workflow
+## Data Transport — Files, Not Prompts
+
+Before invoking any sub-agent, main agent writes a task file to `.claude/tmp/` containing all data the agent needs. The prompt tells the agent only where to find the file — nothing else.
+
+Always run `mkdir -p .claude/tmp` before writing any input file.
+
+**Never** embed task data (versions, notes, file lists, config values) directly in the prompt string — it bypasses the agent's own input format and produces unreliable results.
+
+The table below defines the mandatory file naming convention for each agent. Main agent must use these exact patterns — do not invent alternative names.
+
+| Agent | Input file | Prompt contains |
+| --- | --- | --- |
+| `code-writer` | `.claude/tmp/task-<description>-<YYYYMMDD>.md` | task file path |
+| `code-reviewer` | `.claude/tmp/review-<mod>-<YYYYMMDD>.md` (findings) | code file paths + findings file path |
+| `release-publisher` | `.claude/tmp/release-<mod>-<version>.json` (manifest) | `phase: execute, manifest: <path>` |
+| `mod-release-notes-writer` | commits passed inline | notes output path |
+| `lessons-collector` | `.claude/tmp/lessons-*.md` + `review-*.md` | all temp file paths |
+
+If an agent defines a specific invocation format (e.g. `phase: execute, manifest: <path>`), use it exactly — do not paraphrase or add extra instructions in the prompt.
+
+## Typical Workflow — Coding
 
 The main agent orchestrates a write → review loop, then collects lessons:
 
 ```text
-main agent        →  creates task file:
-                       .claude/tmp/task-<short-description>-<YYYYMMDD>.md
-
 code-writer       →  reads task file, writes or edits code
                      writes impl lessons (if any) to:
                        .claude/tmp/lessons-<short-description>-<YYYYMMDD>.md
@@ -73,6 +90,42 @@ lessons-collector →  receives all temp file paths (lessons + review files)
                      syncs with Gist, merges, appends new lessons to:
                        docs/dev-lessons.md
                      uploads to Gist, deletes temp files
+```
+
+## Typical Workflow — Release
+
+The main agent orchestrates analysis, confirmation, and publishing:
+
+```text
+── phase 1: analyze ──────────────────────────────────────────────────────────
+
+release-publisher →  invoked with: phase: analyze, mods: [<mod>, ...]
+                     collects commits, infers bump, reads game version
+                     invokes mod-release-notes-writer, saves notes to:
+                       .claude/tmp/release-notes-<mod>-<version>.md
+                     writes analysis to:
+                       .claude/tmp/release-analysis-<mod>.json
+                     returns summary for each mod
+
+── user confirmation ─────────────────────────────────────────────────────────
+
+main agent        →  presents summary + notes preview to user
+                     waits for explicit confirmation before proceeding
+
+── phase 2: execute (per mod, after confirmation) ────────────────────────────
+
+main agent        →  updates mods/<mod>/<mod>.json (version, build_on_game_version)
+                     updates README.md, README.zh-CN.md, README.zh-TW.md
+                     updates mods/<mod>/CHANGELOG.md
+                     commits version bump
+                     writes release manifest (see Data Transport above)
+
+release-publisher →  invoked with: phase: execute, manifest: .claude/tmp/release-<mod>-<version>.json
+                     creates and pushes tag
+                     builds and packages mod (scripts/release.ps1)
+                     updates GitHub release notes (What's New + Release Info + Installation)
+                     verifies release (isDraft=false, isPrerelease=false, assets non-empty, body non-empty)
+                     reports success or failure
 ```
 
 ## Adding a New Agent

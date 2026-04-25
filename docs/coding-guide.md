@@ -44,13 +44,9 @@ Delegate actual code writing to sub-agents to keep the main conversation context
 
 ### Task files
 
-Before spawning `code-writer`, the main agent creates a task file:
+Before spawning `code-writer`, create a task file (see `docs/sub-agents.md` — Data Transport for file location and naming). Include enough information that code-writer can complete the task without asking for clarification: goal, relevant file paths, requirements, and any context links.
 
-1. Run `mkdir -p .claude/tmp` before writing.
-2. Write to `.claude/tmp/task-<short-description>-<YYYYMMDD>.md` (e.g. `task-reload-run-fix-20260417.md`).
-3. Include enough information that code-writer can complete the task without asking for clarification: goal, relevant file paths, requirements, and any context links.
-
-After the review loop returns `APPROVED`, the main agent deletes the task file if one was created.
+After the review loop returns `APPROVED`, delete the task file if one was created.
 
 ### After writing code
 

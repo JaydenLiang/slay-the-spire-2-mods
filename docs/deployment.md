@@ -149,13 +149,19 @@ For each mod, after user confirms:
   "tag": "<mod>/<version>",
   "build_on_game_version": "<build_on_game_version>",
   "repo": "<owner>/<repo>",
-  "notes": "<contents of .claude/tmp/release-notes-<mod>-<version>.md>"
+  "notes_file": ".claude/tmp/release-notes-<mod>-<version>.md"
 }
 ```
 
-1. Invoke `release-publisher` agent with the manifest path.
+2. Invoke `release-publisher` with **exactly** this prompt:
 
-1. Wait for `release-publisher` to report success before proceeding to the next mod.
+   ```text
+   phase: execute, manifest: .claude/tmp/release-<mod>-<version>.json
+   ```
+
+   Do not use a free-form prompt — the agent reads the manifest file and applies its own template for the full release notes (What's New + Release Info + Installation). A free-form prompt bypasses the template and will produce incomplete notes.
+
+3. Wait for `release-publisher` to report success before proceeding to the next mod.
 
 ---
 
